@@ -5,6 +5,8 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
+    "deploy": "yarn compile && docusaurus deploy",
+    "build": "yarn compile && docusaurus build",
     "compile": "yarn tsc --project tsconfig.build.json",
     "compile:dev": "yarn tsc --project tsconfig.build.json --watch"
   },
