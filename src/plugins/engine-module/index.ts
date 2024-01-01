@@ -1,21 +1,24 @@
-import type { Plugin } from '@docusaurus/types';
+import type { Plugin, LoadContext } from '@docusaurus/types';
 import { listFiles, pathToPagePath } from '../../utils/server/file-utils';
 import path from 'path';
 import { PluginBase } from '../_base';
 
-const pathToPages = path.join('../', 'src', 'pages');
-
-export default function themeSearchAlgolia(): Plugin<string[]> {
+export default function engineModulePlugin(
+  context: LoadContext,
+): Plugin<string[]> {
+  const { siteDir } = context;
   const name = 'documentation-website';
+
+  const pathToPages = path.join(siteDir, '../', 'src', 'pages');
 
   return {
     ...PluginBase(name),
 
     getThemePath() {
-      return '../../../../src/theme';
+      return path.join(siteDir, '../', 'src', 'theme');
     },
     getTypeScriptThemePath() {
-      return '../../../../src/theme';
+      return path.join(siteDir, '../', 'src', 'theme');
     },
 
     loadContent() {
