@@ -1,6 +1,6 @@
 const config = require('../lib/config/docusaurus');
 const codeComponentTagger = require('./lib/plugins/content-tags/remark/tagger').default;
-const displayJSON = require('./lib/plugins/display-json/theme/mdx/displayJSON').default;
+const displayJSON = require('./lib/plugins/display-json/remark/plugin').default;
 const merge = require('./lib/utils/merge').default;
 
 const pluginPath = (name) => `./lib/plugins/${name}/index.js`;

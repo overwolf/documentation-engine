@@ -35,6 +35,7 @@
     "jsdoc"
   ],
   "rules": {
+    "prettier/prettier": "error",
     "@docusaurus/string-literal-i18n-messages": "warn",
     "@docusaurus/no-untranslated-text": "warn",
     "react/jsx-uses-react": "off",
