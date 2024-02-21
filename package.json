@@ -22,7 +22,7 @@
     "docusaurus-gtm-plugin": "^0.0.2",
     "docusaurus-plugin-clarity": "^2.1.0",
     "docusaurus-plugin-sass": "^0.2.2",
-    "fp-ts": "/Users/Oded/AppData/Local/Temp/xfs-c406079c/user",
+    "fp-ts": "^2.16.1",
     "fs-extra": "^11.2.0",
     "io-ts": "^2.2.20",
     "json-diff": "^1.0.6",
