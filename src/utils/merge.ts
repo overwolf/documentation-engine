@@ -19,7 +19,9 @@ const clean = (target: any) => {
   if (Array.isArray(target) && typeof target !== 'string') {
     const clearUpTo = target.lastIndexOf(clearArrayFlag);
     if (clearUpTo !== -1) target = target.slice(clearUpTo + 1);
-    return target.map((cell) => clean(cell)).filter((val) => val !== undefined);
+    return target
+      .map((cell: any) => clean(cell))
+      .filter((val: any) => val !== undefined);
   }
 
   if (typeof target === 'object')
@@ -27,7 +29,7 @@ const clean = (target: any) => {
       const newValue = clean(target[key]);
       if (newValue !== undefined) newTarget[key] = newValue;
       return newTarget;
-    }, {});
+    }, {} as { [key: string]: any });
   return target;
 };
 

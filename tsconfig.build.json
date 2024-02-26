@@ -3,6 +3,7 @@
     "skipLibCheck": true,
     "noEmit": false,
     "outDir": "lib",
+    "strict": true
   },
   "exclude": ["**/*.js", "**/*.jsx", "**/*.tsx", "src/client-modules/**/*"],
   "extends": "./tsconfig.base.json"

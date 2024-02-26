@@ -2,9 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@site/*": [
-        "./*"
-      ],
       "@theme/*": [
         "./src/theme/*",
       ]

@@ -3,6 +3,7 @@
   "display": "Docusaurus v2",
   "docs": "https://v2.docusaurus.io/docs/typescript-support",
   "compilerOptions": {
+    "downlevelIteration": true,
     "allowJs": true,
     "esModuleInterop": true,
     "jsx": "react",
@@ -16,7 +17,7 @@
       "@docusaurus/theme-classic"
     ],
     "baseUrl": ".",
-    "skipLibCheck": false
+    "skipLibCheck": false,
   },
   "extends": "@tsconfig/docusaurus/tsconfig.json"
 }
