@@ -9,7 +9,7 @@ export default function engineModulePlugin(
   const { siteDir } = context;
   const name = 'documentation-website';
 
-  const pathToPages = path.join(siteDir, '../', 'src', 'pages');
+  // const pathToPages = path.join(siteDir, '../', 'src', 'pages');
 
   return {
     ...PluginBase(name),
@@ -19,20 +19,6 @@ export default function engineModulePlugin(
     },
     getTypeScriptThemePath() {
       return path.join(siteDir, '../', 'src', 'theme');
-    },
-
-    loadContent() {
-      return listFiles(pathToPages, ['.tsx']);
-    },
-
-    contentLoaded({ content, actions: { addRoute } }) {
-      content.forEach((page) =>
-        addRoute({
-          path: pathToPagePath(path.relative(pathToPages, page)),
-          component: page,
-          exact: true,
-        }),
-      );
     },
   };
 }

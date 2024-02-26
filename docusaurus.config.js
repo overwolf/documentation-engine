@@ -58,6 +58,9 @@ const defaultConfig = {
         theme: {
           // customCss: [], // global css stylesheets
         },
+        pages: {
+          path: '../src/pages'
+        }
       },
     ],
   ],
