@@ -89,7 +89,7 @@ const DisplayJSONStructure = {
   },
   [DisplayJSONUnits._v_linked]: {
     name: 'Linked',
-    props: { value: '' as string },
+    props: {} as NoValue,
     children: [DisplayJSONUnits._generic, DisplayJSONUnits._name_literal],
   },
   [DisplayJSONUnits._v_primitive]: {

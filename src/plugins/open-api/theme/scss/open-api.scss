@@ -1,0 +1,171 @@
+html{ // [data-theme=dark]
+  --open-api-request-get: #EC7068;
+  --open-api-request-post: #7ED5D6;
+
+  --open-api-params-table-background: #000000;
+  --open-api-params-table-title: #101010;
+  --open-api-params-table-border: #202020;
+
+  --open-api-params-table-comment: #9F9F9F;
+  --open-api-params-table-name: #DFDFDF;
+}
+
+html[data-theme=light]{
+
+}
+
+
+.open-api {
+  ul {
+    all: unset;
+    list-style-type: none !important;
+    *::before { all: unset; }
+  }
+
+  .info {
+    .title {
+
+    }
+
+    .description {
+
+    }
+  }
+
+  .endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+    .path {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+
+      .type {
+        white-space: pre-wrap;
+        color: var(--open-api-request-post);
+      }
+
+      .request-info {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        .request-type {
+          &.get {
+            color: var(--open-api-request-get);
+          }
+
+          &.post {
+            color: var(--open-api-request-post);
+          }
+        }
+
+        .request-path {
+
+        }
+      }
+
+      .description {
+
+      }
+
+      .parameters-table {
+        display: flex;
+        border-color: var(--open-api-params-table-border);
+        border-width: 1px;
+        border-style: solid;
+        flex-direction: column;
+        gap: 0px;
+        background-color: var(--open-api-params-table-background);
+        .title {
+          padding: 16px 20px 16px 20px;
+          background-color: var(--open-api-params-table-title);
+          margin: 0px;
+        }
+
+
+        .columns {
+          h4 {
+            font-size: 14px !important;
+          }
+        }
+
+        .content {
+          .item {
+            & > * {
+              border-color: var(--open-api-params-table-border);
+              border-width: 1px 0px 0px;
+              border-style: solid;
+            }
+            .comment {
+              padding: 16px 20px 16px 20px;
+              white-space: pre-wrap;
+              color: var(--open-api-params-table-comment);
+            }
+
+            .field {
+              display: flex;
+              justify-content: space-between;
+              flex-direction: row;
+              & > * {
+                flex: 1;
+                padding: 16px 20px 16px 20px;
+              }
+              & > :not(:first-child) {
+                border-color: var(--open-api-params-table-border);
+                border-width: 0px 0px 0px 1px;
+                border-style: solid;
+              }
+
+              .name {
+                display: inline-block;
+                white-space: pre-wrap;
+                color: var(--open-api-params-table-name);
+
+                .response-description {
+                  color: var(--open-api-params-table-comment);
+                }
+
+                .required {
+                  color: var(--open-api-request-get);
+                }
+              }
+
+              .data {
+                .response-headers {
+
+                }
+
+                .response-data {
+                  .content-type {
+                    font-size: 12px;
+                    color: var(--open-api-params-table-comment);
+                  }
+                  
+                  .type {
+                  }
+                }
+              }
+
+              .type {
+
+              }
+
+              .input {
+                .text {
+                  width: 100%;
+                }
+
+                .hint {
+                  font-size: 12px;
+                  color: var(--open-api-params-table-comment);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

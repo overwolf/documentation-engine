@@ -14,7 +14,7 @@ import { DJPU } from '../../../../core/parse-unit';
 export type LinkedParseData = LinkedData & HasGenericData;
 
 export type LinkedData = {
-  value: string;
+  name: DJNB<DisplayJSONUnits._name_literal>;
 };
 
 export default class LinkedSubParser extends SimpleSubParser<
@@ -28,11 +28,10 @@ export default class LinkedSubParser extends SimpleSubParser<
 
   protected CreateNode = (data: PD<LinkedParseData>) =>
     E.right(
-      createDisplayJSONNode(
-        DisplayJSONUnits._v_linked,
-        { value: data.layerData.value },
-        [data.layerData.generic],
-      ),
+      createDisplayJSONNode(DisplayJSONUnits._v_linked, {}, [
+        data.layerData.generic,
+        data.layerData.name,
+      ]),
     );
 
   protected Starts = (data: PD<LinkedParseData>) =>
@@ -45,10 +44,9 @@ export default class LinkedSubParser extends SimpleSubParser<
       }),
       E.map((name) => {
         // TODO: Check if we can make this only run in prod build somehow
+        data.layerData.name = name;
         data.escapeHatch({
-          key: RequestedLinkPrefix(
-            (data.layerData.value = name.data.hProperties.value),
-          ),
+          key: RequestedLinkPrefix(name.data.hProperties.value),
           content: '',
         });
         return data;

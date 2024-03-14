@@ -7,7 +7,7 @@ const pluginPath = (name) => `./lib/plugins/${name}/index.js`;
 
 const defaultConfig = {
   // title: '', // website title
-  themes: [pluginPath('engine-module'), pluginPath('content-tags'), pluginPath('display-json')], // themes (client side code)
+  themes: [pluginPath('engine-module'), pluginPath('content-tags'), pluginPath('display-json'), pluginPath('open-api')], // themes (client side code)
   staticDirectories: ['../static'],
   // tagline: '', // website tagline
   // url: '', // website url
