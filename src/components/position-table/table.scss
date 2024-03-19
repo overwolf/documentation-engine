@@ -1,0 +1,50 @@
+html {
+  --ow-components-table-header-color: var(--ifm-table-head-color);
+  --ow-components-table-header-background: var(--ifm-table-head-background);
+  --ow-components-table-cell-color: var(--ifm-table-cell-color);
+  --ow-components-table-cell-background: var(--color-headline);
+  --ow-components-table-border-color: var(--ifm-table-border-color);
+  --ow-components-table-border: var(--ifm-table-border-width) solid var(--ow-components-table-border-color);
+}
+
+html[data-theme="dark"] {
+  --ow-components-table-header-color: white;
+  --ow-components-table-header-background: var(--color-300);
+  --ow-components-table-cell-color: var(--color-txt);
+  --ow-components-table-cell-background: var(--color-200);
+  --ow-components-table-border-color: var(--color-100);
+}
+
+ul.position-table {
+  display: grid;
+  padding: 0px;
+  gap: 0px;
+
+  border: var(--ow-components-table-border);
+
+  > li.table-cell {
+    padding: 5px 20px;
+    margin: 0px;
+
+    > * {
+      line-height: 1.5;
+    }
+
+    border: var(--ow-components-table-border);
+    background-color: var(--ow-components-table-cell-background);
+    color: var(--ow-components-table-cell-color);
+
+    &::before {
+      content: none;
+    }
+
+    &.table-header {
+      line-height: 25px;
+      padding: 15px 20px;
+      background-color: var(--ow-components-table-header-background);
+      color: var(--ow-components-table-header-color);
+      font-weight: bold;
+      text-align: left
+    }
+  }
+};
