@@ -1,4 +1,4 @@
-import { ContentTransform } from '../../_base/remark/plugins/plugin-block';
+import { ContentTransform } from '../../_base/remark/plugins/plugin';
 import {
   stringToRegex,
   stringsToRegex,

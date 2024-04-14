@@ -1,13 +1,14 @@
 const config = require('../lib/config/docusaurus');
 const codeComponentTagger = require('./lib/plugins/content-tags/remark/tagger').default;
 const displayJSON = require('./lib/plugins/display-json/remark/plugin').default;
+const highlight = require('./lib/plugins/highlight/remark/plugin').default;
 const merge = require('./lib/utils/merge').default;
 
 const pluginPath = (name) => `./lib/plugins/${name}/index.js`;
 
 const defaultConfig = {
   // title: '', // website title
-  themes: [pluginPath('engine-module'), pluginPath('content-tags'), pluginPath('display-json'), pluginPath('open-api')], // themes (client side code)
+  themes: [pluginPath('engine-module'), pluginPath('content-tags'), pluginPath('display-json'), pluginPath('open-api'), pluginPath('highlight')], // themes (client side code)
   staticDirectories: ['../static'],
   // tagline: '', // website tagline
   // url: '', // website url
@@ -19,6 +20,7 @@ const defaultConfig = {
   // scripts: [] // scripts to be added to every page in the website
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Lato%3A400%2C400i%2C700%2C900&ver=4.5.3',
+    'https://fonts.googleapis.com/css?family=Montserrat%3A400%2C400i%2C700%2C900&ver=4.5.3',
   ],
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
@@ -43,7 +45,7 @@ const defaultConfig = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          remarkPlugins: [codeComponentTagger, displayJSON],
+          remarkPlugins: [codeComponentTagger, displayJSON, highlight],
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           // editUrl: '', // url for suggesting edits

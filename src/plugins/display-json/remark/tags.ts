@@ -3,7 +3,7 @@ import {
   DeEscapeClosing,
   DeEscapeOpening,
   OpeningTagFactory,
-} from '../../_base/remark/plugins/plugin-block';
+} from '../../_base/remark/plugins/plugin';
 import { DisplayJSONOptions } from './options';
 
 /* IMPORTANT - Make sure not to try to match for line-end here,
@@ -14,17 +14,14 @@ export const openingTagFactory: OpeningTagFactory<DisplayJSONOptions> = (
   new RegExp(
     `^(?<!${options.escapeString})${tagFuzzy(
       options.openingTag,
-    )}(?: ([\\w\\.\\-]*))?(?:\\s*)`,
+    )}(?: ([\\w\\.\\-]*))?`,
   );
 
 /* IMPORTANT - Make sure not to try to match for line-end here,
    since the lines this will run on are split into strings already */
 export const closingTagFactory: ClosingTagFactory<DisplayJSONOptions> = (
   options: DisplayJSONOptions,
-) =>
-  new RegExp(
-    `^(?<!${options.escapeString})${tagFuzzy(options.closingTag)}(?:\\s*?)$`,
-  );
+) => new RegExp(`^(?<!${options.escapeString})${tagFuzzy(options.closingTag)}`);
 
 export const deEscapeOpening: DeEscapeOpening<DisplayJSONOptions> = (
   options: DisplayJSONOptions,

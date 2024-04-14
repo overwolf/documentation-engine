@@ -1,4 +1,4 @@
-import { CreateContentNode } from '../../_base/remark/plugins/plugin-block';
+import { CreateContentNode } from '../../_base/remark/plugins/plugin';
 import { DisplayJSONNode } from '../types/display-json-node';
 import { DisplayJSONOptions } from './options';
 import { EscapeHatchEntry } from '../../_base/remark/escape-hatch';

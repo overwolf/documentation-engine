@@ -1,0 +1,23 @@
+span.highlight-directive {
+  /* Caption/Semibold */
+  font-family: Montserrat;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 133.333% */
+  &.must {
+    color: red;
+  }
+
+  &.always {
+    color: #EF6C00;
+  }
+
+  &.may {
+    color: #BA68C8;
+  }
+
+  &.sometimes {
+    color: #0288D1;
+  }
+}

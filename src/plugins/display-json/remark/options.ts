@@ -1,4 +1,7 @@
-import { BaseBlockOptions } from '../../_base/remark/plugins/plugin-block';
+import {
+  BasePluginOptions,
+  PLUGIN_TYPE,
+} from '../../_base/remark/plugins/plugin';
 import { DisplayJSONUnits } from '../core/units';
 import commentBlock, {
   commentBlockRich,
@@ -10,7 +13,7 @@ import commentLine from '../../_base/remark/escaping/sequences/comment-line';
 
 export const defaultOptions = {
   escapeHatchPath: './.docusaurus/display-json',
-  openingTag: '!JSON' as 'json',
+  openingTag: '!JSON' as string,
   closingTag: '/JSON' as string,
   includeOpening: false as boolean,
   includeClosing: false as boolean,
@@ -69,6 +72,9 @@ export const defaultOptions = {
     quoteBacktick,
     commentLine,
   ] as const,
+  pluginType: {
+    block: true,
+  } as PLUGIN_TYPE,
 };
 
 export type DisplayJSONOptions = Options<typeof defaultOptions>;
@@ -82,4 +88,4 @@ export type BlockDefinition = {
 export type BracketTypes = 'Object' | 'Array' | 'Params' | 'Generic';
 
 /** Convenience guard type & redundancy to make typescript not error */
-type Options<T extends BaseBlockOptions> = T & BaseBlockOptions;
+type Options<T extends BasePluginOptions> = T & BasePluginOptions;

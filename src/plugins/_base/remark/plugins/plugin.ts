@@ -6,8 +6,11 @@ import type { Literal } from 'mdast';
 import {
   BaseOptions,
   DEFAULT_ESCAPE,
-  DEFAULT_TURN,
+  DEFAULT_BLOCK_TURN,
   LINE_SEPARATOR,
+  DEFAULT_INLINE_TURN,
+  DEFAULT_COMPONENT,
+  DEFAULT_STRUCTURE,
 } from './plugin-defaults';
 import { createRemarkNode, RemarkNode } from '../../core/nodes';
 import CommitEscapeHatches, {
@@ -16,42 +19,48 @@ import CommitEscapeHatches, {
 } from '../escape-hatch';
 import normalize from '../../fp-ts/normalize';
 
-export interface BaseBlockOptions extends BaseOptions {
+export interface BasePluginOptions extends BaseOptions {
   openingTag: string;
+  locateOpeningTag?: boolean;
   closingTag?: string;
   escapeString?: string;
-  types?: { [key: string]: any };
+  types?: readonly string[];
   includeOpening: boolean;
   includeClosing: boolean;
   parseContent: boolean;
 }
 
+export type PLUGIN_TYPE = {
+  inline?: boolean;
+  block?: boolean;
+};
+
 export type OpeningTagFactory<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
 > = {
   (options: Options, typesMatcher: string): RegExp;
 };
 
 export type ClosingTagFactory<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
 > = {
   (options: Options): RegExp;
 };
 
 export type DeEscapeOpening<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
 > = {
-  (options: Options, escaped: string): string;
+  (options: Options, escaped: string, tags: string): string;
 };
 
 export type DeEscapeClosing<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
 > = {
   (options: Options, escaped: string): string;
 };
 
 export type ContentTransform<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
   Content = string,
   Extra extends object = any,
 > = {
@@ -66,7 +75,7 @@ export type ContentTransform<
 };
 
 export type CreateContentNode<
-  Options extends BaseBlockOptions = BaseBlockOptions,
+  Options extends BasePluginOptions = BasePluginOptions,
   Content = string,
   Extra extends object = any,
 > = {
@@ -80,7 +89,7 @@ export type CreateContentNode<
   ): RemarkNode<any, any>;
 };
 
-export function pluginFactory<Options extends BaseBlockOptions, Content>(
+export function pluginFactory<Options extends BasePluginOptions, Content>(
   nodeType: string,
   defaultOptions: Options,
   openingTagFactory: OpeningTagFactory<Options>,
@@ -101,12 +110,15 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
     optionsInput: Partial<Options> = {},
   ): Transformer {
     const options = normalize(defaultOptions)(optionsInput);
-    const types = Object.keys(options?.types ?? []).join('|');
+    if (!options.pluginType.block && !options.pluginType.inline)
+      throw new Error(`Plugin ${nodeType} is not registered for any parsing`);
+
+    const types = (options?.types ?? []).join('|');
     const openingTag = openingTagFactory(options, types);
     const closingTag = closingTagFactory(options);
 
     /**
-     * The tokenizer is called on a content block's start,
+     * The tokenizer is called on content start,
      * to determine if its node exists within it
      *
      * If the node does exist, it parses it,
@@ -118,26 +130,26 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
      * @param silent
      * @returns
      */
-    function blockTokenizer(
-      this: any,
-      eat: any,
-      value: string,
-      silent: boolean,
-    ) {
+    function tokenizer(this: any, eat: any, value: string, silent: boolean) {
       // Check the value for the opening tag's matcher (w/o start/end spaces)
-      const match = openingTag.exec(value.trim());
+      const openingMatch = openingTag.exec(value);
+
       // eslint-disable-next-line max-len
       // TODO: Verify if a silent run should ONLY return after locating a closing tag
-      // Stop if no match is found / running in silent mode
-      if (!match || silent) {
-        // Return whether match is found AND this is a silent run
-        return match && silent;
+      // Stop if no valid match is found / running in silent mode
+      if (!openingMatch || openingMatch.index !== 0 || silent) {
+        // This can also be written as (match && !silent)
+        if (openingMatch && openingMatch.index !== 0)
+          console.error(
+            // eslint-disable-next-line max-len
+            `Regex for ${nodeType} can match before its index! Matched as ${openingMatch}`,
+          );
+        // Return whether a valid match is found AND this is a silent run
+        return openingMatch && openingMatch.index === 0 && silent;
       }
 
-      // Mark the current location
+      // Mark the current location for potential recursive parsing
       const now = eat.now();
-      // Extract the different match groups from the opening tag
-      const matchGroups = match as string[];
 
       // Consume lines until a closing tag
       let newValue = value;
@@ -147,53 +159,69 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
       let content = [] as string[];
       // Whether or not a closing tag was found
       let success = false;
-      // The current anchor for line splitting
-      let currentAnchor = -1;
+      // An anchor for the end of the opening match
+      let firstMatchIndex = openingMatch.index + openingMatch[0].length;
       // While there is a next line (this will run at least once)
       do {
         // Locate the next newline starting at currentAnchor line
-        const next = newValue.indexOf(LINE_SEPARATOR, currentAnchor + 1);
+        const next = newValue.indexOf(LINE_SEPARATOR);
         // Obtain the string leading up to the closest newline / end of string
-        const line =
-          next > -1
-            ? newValue.slice(currentAnchor + 1, next)
-            : newValue.slice(currentAnchor + 1);
-        // Mark the line as scanned (do not eat it yet)
-        potentialFood.push(line);
+        let line = next > -1 ? newValue.slice(0, next + 1) : newValue;
         // Remove the line from newValue
-        newValue = newValue.slice(currentAnchor + 1);
-        // Trim all spaces from the current line
-        let contentLine = line.trim();
+        newValue = newValue.slice(line.length);
+
+        const newFirstMatchIndex = Math.max(0, firstMatchIndex - line.length);
+
+        const rawLine = line;
+
+        // If we DON'T want to include the opening tag:
+        if (!options.includeOpening) {
+          // take a slice of the line after the remaining first match index
+          line = line.slice(firstMatchIndex);
+        }
+
+        let closingMatch;
         // Check if the closing tag occurs in this trimmed line
-        if (closingTag.exec(contentLine)) {
+        if (
+          // eslint-disable-next-line no-cond-assign
+          (closingMatch = closingTag.exec(rawLine.slice(firstMatchIndex)))
+        ) {
           // Mark as success
           success = true;
-          // If we should include the closing tag, we add it to the content
-          if (!options.includeClosing) {
-            // If we don't want to, remove the closing tag from the line
-            contentLine = contentLine.replace(closingTag, '');
-          }
+
+          const consumedLine = rawLine.slice(
+            0,
+            firstMatchIndex + closingMatch.index + closingMatch[0].length,
+          );
+          line = rawLine.slice(
+            !options.includeOpening ? firstMatchIndex : 0,
+            firstMatchIndex +
+              closingMatch.index +
+              (options.includeClosing ? closingMatch[0].length : 0),
+          );
+
+          // Mark the line as scanned (do not eat it yet)
+          potentialFood.push(consumedLine);
+
+          line = line.trim();
 
           // Add the final line if it has any content left
-          if (contentLine) content.push(contentLine);
+          if (line) content.push(line);
           // Exit the loop
           break;
         }
 
-        // If we DON'T want to include the opening tag:
-        // check if the current anchor is the start of the text
-        if (!options.includeOpening && currentAnchor === -1) {
-          // If it is, remove the opening tag from the text
-          contentLine = contentLine.replace(openingTag, '');
-        }
+        // Mark the line as scanned (do not eat it yet)
+        potentialFood.push(rawLine);
 
+        line = line.trim();
         // Add the content line if it has any content left
-        if (contentLine) content.push(contentLine);
-        // Advance the anchor
-        currentAnchor = newValue.indexOf(LINE_SEPARATOR);
+        if (line) content.push(line);
+        // Ensure that the next line will not be considered the first
+        firstMatchIndex = newFirstMatchIndex;
       } while (
         // Check if there is a next line
-        currentAnchor !== -1
+        newValue.length
       );
 
       /* We throw an error if the block couldn't close, since it means:
@@ -207,15 +235,16 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
         throw new Error(`
 				${nodeType} Was started, but was never closed!
 				Closing regex: ${closingTag.source} ${closingTag}
-				Starting at: ${match}
+				Starting at: ${openingMatch}
 				Now: ${JSON.stringify(now, undefined, 4)}
 				Raw file: ${JSON.stringify(content, undefined, 4)}
 				`);
       }
 
-      content = content.map((line) => {
+      content = content.filter(Boolean).map((line) => {
+        if (line === undefined) console.log(nodeType, value, content);
         // De-escape contained opening tags
-        deEscapeOpening(options, line);
+        deEscapeOpening(options, line, types);
         // De-escape contained closing tags if desired
         line = deEscapeClosing?.(options, line) ?? line;
         // Return the new line
@@ -235,7 +264,7 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
       );
 
       // Consume the parsed text
-      const add = eat(potentialFood.join(LINE_SEPARATOR));
+      const add = eat(potentialFood.join(''));
 
       // All child nodes of this tree
       let childNodes: RemarkNode<any>[] = [];
@@ -244,8 +273,9 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
         rawContent: contentTransformResult?.content ?? content,
         extra: contentTransformResult?.extra ?? {},
       };
-      // Re-parse the content in block mode
-      if (options.parseContent) {
+
+      // Re-parse the content in block mode (requires testing)
+      if (options.pluginType.block && options.parseContent) {
         // Begin a block
         const exit = this.enterBlock();
         // Parse content string
@@ -260,29 +290,69 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
           options,
           properties.rawContent as any[],
           registerEscapeHatchEntries,
-          matchGroups,
+          openingMatch,
           properties.extra,
           childNodes,
-        ) ?? createRemarkNode(nodeType, {}, [nodeType, properties, childNodes]);
+        ) ??
+        createRemarkNode(nodeType, DEFAULT_STRUCTURE(nodeType, properties), [
+          nodeType,
+          properties,
+          childNodes,
+        ]);
 
       CommitEscapeHatches(options.escapeHatchPath ?? '', escapeHatch);
+
+      // if (options.pluginType.inline && this.inBlock) {
+      //   Only ran if this is running as inline
+      // }
+
       return add(element);
     }
 
+    if (options.pluginType.inline)
+      tokenizer.locator = options.locateOpeningTag
+        ? (value: string, fromIndex: number) =>
+            value.indexOf(options.openingTag, fromIndex)
+        : (value: string, fromIndex: number) => {
+            // Based on https://stackoverflow.com/a/273810
+            const indexInSuffix = value.slice(fromIndex).search(openingTag);
+            return indexInSuffix < 0
+              ? indexInSuffix
+              : indexInSuffix + fromIndex;
+          };
+
     // Get the current parser instance
     const Parser = this.Parser?.prototype;
-    // Register this tokenizer for this node type
-    Parser.blockTokenizers[nodeType] = blockTokenizer;
-    // Add the current node type to the parser's parsing queue
-    Parser.blockMethods.splice(
-      // If parsePass is a number, add it at that point
-      typeof parsePass === 'number'
-        ? parsePass
-        : // Otherwise, locate its index, and add this parser just afterwards
-          Parser.blockMethods.indexOf(parsePass ?? DEFAULT_TURN) + 1,
-      0,
-      nodeType,
-    );
+
+    if (options.pluginType.block) {
+      // Register this tokenizer for this node type
+      Parser.blockTokenizers[nodeType] = tokenizer;
+      // Add the current node type to the parser's parsing queue
+      Parser.blockMethods.splice(
+        // If parsePass is a number, add it at that point
+        typeof parsePass === 'number'
+          ? parsePass
+          : // Otherwise, locate its index, and add this parser just afterwards
+            Parser.blockMethods.indexOf(parsePass ?? DEFAULT_BLOCK_TURN) + 1,
+        0,
+        nodeType,
+      );
+    }
+
+    if (options.pluginType.inline) {
+      // Register this tokenizer for this node type
+      Parser.inlineTokenizers[nodeType] = tokenizer;
+      // Add the current node type to the parser's parsing queue
+      Parser.inlineMethods.splice(
+        // If parsePass is a number, add it at that point
+        typeof parsePass === 'number'
+          ? parsePass
+          : // Otherwise, locate its index, and add this parser just afterwards
+            Parser.inlineMethods.indexOf(parsePass ?? DEFAULT_INLINE_TURN) + 1,
+        0,
+        nodeType,
+      );
+    }
 
     // Return a de-escaping transformer,
     // to de-escape escaped syntax of this tag inside of any other node type
@@ -296,7 +366,7 @@ export function pluginFactory<Options extends BaseBlockOptions, Content>(
         (node: Literal) => {
           // If  it has a value, de-escape all relevant syntax of this node
           if (node.value) {
-            node.value = deEscapeOpening(options, node.value);
+            node.value = deEscapeOpening(options, node.value, types);
             node.value = deEscapeClosing?.(options, node.value) ?? node.value;
           }
         },

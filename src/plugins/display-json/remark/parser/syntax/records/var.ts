@@ -16,7 +16,7 @@ export type VarParseData = SequenceParseData & {
   fieldData: DJNB<DisplayJSONUnits._field>;
 };
 
-const VarKeywords = ['var', 'const', 'let'];
+const VarKeywords = ['var', 'const', 'let', 'type'];
 
 export default class VarSubParser extends SimpleSubParser<
   DisplayJSONUnits,

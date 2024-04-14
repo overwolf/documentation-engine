@@ -14,7 +14,8 @@ function CollapseBlock(
   props: DisplayJSONPropsChildren<{ opening: string; closing: string }>,
 ) {
   const { opening, children, closing } = props;
-  const [open, setOpen] = useState(true);
+  const hasChildren = !!children;
+  const [open, setOpen] = useState(hasChildren);
   const childArray = ToChildArray(children);
   const separated = childArray.map((child, index) => {
     return (
@@ -37,9 +38,9 @@ function CollapseBlock(
         className={clsx(classnames.opening, {
           open,
         })}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen(hasChildren && !open)}
       >
-        <Expand open={open} />
+        {hasChildren && <Expand open={open} />}
         {opening}
       </span>
       <span style={{ display: open ? '' : 'none' }}>
@@ -49,12 +50,15 @@ function CollapseBlock(
       </span>
       <span
         className={classnames.collapsed}
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen(hasChildren && true)}
         style={{ display: open ? 'none' : '' }}
       >
         {separated}
       </span>
-      <span className={classnames.closing} onClick={() => setOpen(!open)}>
+      <span
+        className={classnames.closing}
+        onClick={() => setOpen(hasChildren && !open)}
+      >
         {closing}
       </span>
     </span>
