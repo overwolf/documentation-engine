@@ -12,13 +12,13 @@ function Full({
     <>
       <div className="info">
         <h1 className="title">{data.info.title} - Specification</h1>
-        <p className="description">{children || data.info.description}</p>
+        <div className="description">{children || data.info.description}</div>
       </div>
-      <ul className="endpoints">
+      <div className="endpoints">
         {Object.keys(data.paths).map((path: string) => (
           <Path key={path} path={path} pathObject={data.paths[path]} />
         ))}
-      </ul>
+      </div>
     </>
   );
 }

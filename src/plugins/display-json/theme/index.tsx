@@ -33,6 +33,7 @@ import KeepLiteralNode from './components/literal/keep';
 import SkipNode from './components/skip';
 import AssignmentNode from './components/assignment';
 import classes from '../scss/root.module.scss';
+import GroupNode from './components/literal/group';
 
 export const classnames = classes;
 
@@ -64,6 +65,7 @@ const ReactComponents = {
   [DisplayJSONUnits.KeepLiteral]: KeepLiteralNode,
   [DisplayJSONUnits.Skip]: SkipNode,
   [DisplayJSONUnits._s_assignment]: AssignmentNode,
+  [DisplayJSONUnits._group]: GroupNode,
 } as const;
 
 // eslint-disable-next-line no-unused-vars
@@ -95,6 +97,7 @@ export const DisplayJSONClasses: { [key in DisplayJSONUnits]: string } = {
   [DisplayJSONUnits.KeepLiteral]: 'keep-literal',
   [DisplayJSONUnits.Skip]: 'skip',
   [DisplayJSONUnits._s_assignment]: 'assignment',
+  [DisplayJSONUnits._group]: 'group',
 };
 
 function DisplayJSONRenderNode(

@@ -9,7 +9,7 @@ import {
   ParseTree,
   ParseTreeStepParseUnit,
   ParseTreeStepParser,
-  ParseTreeStepUnwind as ParseTreeStepRewind,
+  ParseTreeStepUnwind,
 } from './praser-tree';
 import edit from '../../fp-ts/edit';
 import runIf from '../../fp-ts/run-if';
@@ -184,7 +184,7 @@ export default abstract class BaseParser<
               parentLeaves.push({
                 initialIndex: reason.startIndex,
                 lastIndex: this._currentPosition,
-              } as ParseTreeStepRewind);
+              } as ParseTreeStepUnwind);
               this._currentPosition = reason.startIndex;
             }),
             rewindOnFailure,

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { DisplayJSONPropsChildren } from '../../types/DisplayJSONProperties';
 import Comma from '../syntactic/Comma';
 import NewLine from '../syntactic/NewLine';
@@ -18,12 +18,12 @@ function CollapseBlock(
   const childArray = ToChildArray(children);
   const separated = childArray.map((child, index) => {
     return (
-      <>
+      <Fragment key={index}>
         <Indent />
         {child}
         {childArray.length !== index + 1 && <Comma />}
         <NewLine />
-      </>
+      </Fragment>
     );
   });
   const indentCount =

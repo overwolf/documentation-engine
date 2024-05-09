@@ -51,7 +51,10 @@ export default class NameSubParser extends SimpleSubParser<
   protected Starts = (data: PD<NameParseData>) =>
     flow(
       firstInChain<DisplayJSONUnits, AllowedChildren>([
-        [DisplayJSONUnits._v_string, data.layerData.enableStringName],
+        [
+          DisplayJSONUnits._v_string,
+          { disabled: !data.layerData.enableStringName },
+        ],
         DisplayJSONUnits._name_literal,
       ]),
       E.map((resultNode: AllowedChildren) => {

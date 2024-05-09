@@ -1,5 +1,4 @@
 import type { Plugin, LoadContext } from '@docusaurus/types';
-import { listFiles, pathToPagePath } from '../../utils/server/file-utils';
 import path from 'path';
 import { PluginBase } from '../_base';
 

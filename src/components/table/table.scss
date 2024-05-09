@@ -1,0 +1,69 @@
+/**
+ * Variables
+ */
+html {
+  --ow-components-table-header-color: var(--ifm-table-head-color);
+  --ow-components-table-header-background: var(--ifm-table-head-background);
+  --ow-components-table-cell-color: var(--ifm-table-cell-color);
+  --ow-components-table-cell-background: var(--color-headline);
+  --ow-components-table-border-color: var(--ifm-table-border-color);
+  --ow-components-table-border: 1px solid var(--ow-components-table-border-color);
+
+  &[data-theme="dark"] {
+    --ow-components-table-header-color: white;
+    --ow-components-table-header-background: #101010;
+    --ow-components-table-cell-color: var(--color-txt);
+    --ow-components-table-cell-background: #000000;
+    --ow-components-table-border-color: #202020;
+  }
+}
+
+ul.position-table {
+  display: grid !important; // Sometimes chrome arbitrarily decides that this can compete with its own stylesheet, so we use `!important`
+
+  &.default-style {
+    padding: 0px;
+    gap: 0px;
+    border: var(--ow-components-table-border);
+  }
+
+
+  >li.table-cell,
+  >li.subgrid {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+
+    &::before {
+      content: none;
+    }
+
+    &:not(.none) {
+      margin: 0px;
+
+      color: var(--ow-components-table-cell-color);
+    }
+  }
+
+  >li.table-cell,
+  >li.subgrid>div.table-cell {
+    &:not(.none) {
+      border: var(--ow-components-table-border);
+    }
+
+    &.default {
+      line-height: 1.5;
+      padding: 5px 20px;
+      background-color: var(--ow-components-table-cell-background);
+    }
+
+    &.header {
+      line-height: 25px;
+      padding: 15px 20px;
+      background-color: var(--ow-components-table-header-background);
+      color: var(--ow-components-table-header-color);
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+}

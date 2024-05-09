@@ -9,6 +9,7 @@ export const enum DisplayJSONUnits {
   _object = '_object',
   _callback = '_callback',
   _parameters = '_parameters',
+  _group = '_group',
   _union = '_union',
   _name_literal = '_name_literal',
   // Structures

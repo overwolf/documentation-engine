@@ -1,19 +1,15 @@
 import React, { useContext } from 'react';
-import {
-  OpenAPISpec,
-  PathObject,
-  RequestTypes,
-  Response,
-} from '../../core/open-api';
+import { OpenAPISpec, PathObject, RequestTypes } from '../../core/open-api';
 import clsx from 'clsx';
-import ParametersTable, {
-  ParametersTableChild,
-  ResponseTableChild,
+import {
+  BodyParametersTableTabRenderer,
+  ParametersTableTabRenderer,
+  ResponsesTableTabRenderer,
 } from '../utils/parameters-table';
 import componentFromRef from '../../core/ref';
 import { ComponentsContext } from '../contexts/components';
-import Schema from './schema';
 import { ServersContext } from '../contexts/servers';
+import Tabs, { TabsVariants } from '../../../../components/tabs/tabs';
 
 function PathRequest<Request extends RequestTypes>({
   path,
@@ -29,12 +25,12 @@ function PathRequest<Request extends RequestTypes>({
   const params = pathObject.parameters?.map((param) =>
     componentFromRef(param, components),
   );
-  const queryParams = params?.filter((param) => param.in === 'query');
-  const headerParams = params?.filter((param) => param.in === 'header');
-  const pathParams = params?.filter((param) => param.in === 'path');
+  const queryParams = params?.filter((param) => param.in === 'query') ?? [];
+  const headerParams = params?.filter((param) => param.in === 'header') ?? [];
+  const pathParams = params?.filter((param) => param.in === 'path') ?? [];
   const bodyParams = pathObject?.requestBody?.content ?? {};
   return (
-    <li className="path">
+    <article className="path">
       <h3 className="request-info">
         <div className={clsx('request-type', requestType)}>
           {requestType.toUpperCase()}
@@ -45,108 +41,42 @@ function PathRequest<Request extends RequestTypes>({
 
       <pre className="path">
         {servers.servers[servers.selected].url}
-        {path}
+        {path /* .replace(pathParams => pathValues) */}
+        {/* Query params + values */}
       </pre>
-
-      {!!headerParams?.length && (
-        <ParametersTable type="header">
-          {headerParams.map((param) => (
-            <ParametersTableChild
-              key={param.name}
-              name={param.name}
-              description={param.description}
-              required={param.required}
-              schema={componentFromRef(param.schema, components)}
-            />
-          ))}
-        </ParametersTable>
-      )}
-      {!!pathParams?.length && (
-        <ParametersTable type="path">
-          {pathParams.map((param) => (
-            <ParametersTableChild
-              key={param.name}
-              name={param.name}
-              description={param.description}
-              required={param.required}
-              schema={componentFromRef(param.schema, components)}
-            />
-          ))}
-        </ParametersTable>
-      )}
-      {!!queryParams?.length && (
-        <ParametersTable type="query">
-          {queryParams.map((param) => (
-            <ParametersTableChild
-              key={param.name}
-              name={param.name}
-              description={param.description}
-              required={param.required}
-              schema={componentFromRef(param.schema, components)}
-            />
-          ))}
-        </ParametersTable>
-      )}
-      {!!bodyParams && (
-        <div className="body">
-          {Object.keys(bodyParams).map((contentType) => {
-            const schema = componentFromRef<'schemas'>(
-              bodyParams[contentType].schema,
-              components,
-            );
-            return (
-              <div key={contentType} className="parameters-table">
-                <h4 className="title">REQUEST BODY</h4>
-
-                <div className="content">
-                  <div className="item">
-                    <div className="field">
-                      <div className="data">
-                        <div className="response-data">
-                          <div className="content-type">{contentType}</div>
-                          <Schema data={schema} />
-                          {/* <ParametersTable type="body">
-                  {scheme.type === 'object' && scheme.properties}
-                  <div className="content-type">{contentType}</div>
-                  <ParametersTableChild
-                    key={contentType}
-                    name={param.name}
-                    description={param.description}
-                    required={param.required}
-                    schema={componentFromRef(param.schema, components)} />
-                  <Schema
-                    key={contentType}
-                    data= />
-                </ParametersTable> */}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      <div className="response">
-        <ParametersTable type="response">
-          {Object.keys(pathObject.responses).map((code) => {
-            const response = componentFromRef<'responses'>(
-              pathObject.responses[code],
-              components,
-            );
-            return (
-              <ResponseTableChild
-                key={code}
-                name={code}
-                description={response.description}
-                response={response}
-              />
-            );
-          })}
-        </ParametersTable>
-      </div>
-    </li>
+      <Tabs
+        stretchLabels
+        variant={TabsVariants.OPEN_API_PARAMS}
+        fillContent
+        renderers={[
+          ParametersTableTabRenderer({
+            type: 'header',
+            allowRequired: true,
+            hideExamples: false,
+            params: headerParams,
+          }),
+          ParametersTableTabRenderer({
+            type: 'path',
+            allowRequired: true,
+            hideExamples: false,
+            params: pathParams,
+          }),
+          ParametersTableTabRenderer({
+            type: 'query',
+            allowRequired: true,
+            hideExamples: false,
+            params: queryParams,
+          }),
+          BodyParametersTableTabRenderer({
+            hideExamples: false,
+            content: bodyParams,
+          }),
+          ResponsesTableTabRenderer({
+            responses: pathObject.responses ?? {},
+          }),
+        ]}
+      />
+    </article>
   );
 }
 

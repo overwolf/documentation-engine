@@ -16,11 +16,15 @@ type NumberSchema = {
   type: 'number';
 } & EnumSchema<number>;
 
+type FormatBinary = {
+  format?: 'binary';
+};
+
 type StringSchema = ({
   type: 'string';
   pattern?: string;
 } & EnumSchema<string>) &
-  (FormatStringSchemas | {});
+  (FormatStringSchemas | FormatBinary | {});
 
 export type FormatStringSchemas = {
   'x-ow-redirect'?: OwRedirect;

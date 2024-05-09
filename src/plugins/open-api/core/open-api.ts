@@ -61,15 +61,15 @@ export type SecuritySceme = {
     }
 );
 
-export type Parameter =
-  | {
-      name: string;
-      in: 'query' | 'cookie' | 'header' | 'path';
-      required?: true;
-      description: string;
-      schema: SchemaType;
-    }
-  | ValidRef<'parameters'>;
+export type ParameterType = {
+  name: string;
+  in: 'query' | 'cookie' | 'header' | 'path';
+  required?: true;
+  description: string;
+  schema: SchemaType;
+};
+
+export type Parameter = ParameterType | ValidRef<'parameters'>;
 
 export type Server = {
   description: string;
@@ -79,6 +79,7 @@ export type Server = {
 export enum ContentType {
   ApplicationJSON = 'application/json',
   URLEncodedForm = 'application/x-www-form-urlencoded',
+  OCTETStream = 'application/octet-stream',
 }
 
 export type StringRecords<Record, Keys extends string> = {
@@ -135,9 +136,11 @@ export type PathObject<
         required?: true;
         content: Content<SchemaType>;
       };
-  responses: {
-    [code in StatusCodes]?: Response | ValidRef<'responses'>;
-  };
+  responses: Responses;
+};
+
+export type Responses = {
+  [code in StatusCodes]?: Response | ValidRef<'responses'>;
 };
 
 export type Path<Tags extends string, Comps extends Components<any>> = {

@@ -195,6 +195,11 @@ const DisplayJSONStructure = {
     props: { value: '' as AssignmentValueType, optional: false as boolean },
     children: [],
   },
+  [DisplayJSONUnits._group]: {
+    name: 'Group',
+    props: {} as NoValue,
+    children: [Commented, DisplayJSONUnits._value],
+  },
 } as const;
 
 export type DisplayJSONStructureType = typeof DisplayJSONStructure;

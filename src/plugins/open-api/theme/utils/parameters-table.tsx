@@ -1,104 +1,105 @@
+/* eslint-disable @docusaurus/no-untranslated-text */
 import React, { PropsWithChildren, useContext } from 'react';
 import { ParsedSchemaType } from '../../core/schema';
 import Schema from '../components/schema';
-import { Response } from '../../core/open-api';
+import {
+  Content,
+  ParameterType,
+  Response,
+  Responses,
+} from '../../core/open-api';
 import componentFromRef from '../../core/ref';
 import { ComponentsContext } from '../contexts/components';
+import TableHeader from '../../../../components/table/table-header';
+import Table from '../../../../components/table/table';
+import TableCell from '../../../../components/table/table-cell';
+import TableSubCell from '../../../../components/table/table-sub-cell';
+import Tabs, { TabsVariants } from '../../../../components/tabs/tabs';
+import {
+  TabItemLabelVariants,
+  TabItemRenderers,
+} from '../../../../components/tabs/tab-item';
+import { GridTemplate } from '../../../../utils/renderer/grid/style';
 
 type TableTypes = 'query' | 'response' | 'header' | 'path' | 'body';
 const titles: { [type in TableTypes]: string } = {
-  body: 'REQUEST BODY',
-  header: 'HEADER PARAMS',
-  path: 'PATH PARAMS',
-  query: 'QUERY PARAMS',
+  body: 'BODY',
+  header: 'HEADER',
+  path: 'PATH',
+  query: 'QUERY',
   response: 'RESPONSES',
 };
 
+const FIRST_CONTENT_ROW = 2;
+const paramsCount = 'params-count';
+const paramsLabel = 'params-label';
+
 function ParametersTable({
   type,
+  hideExamples,
   children,
-}: PropsWithChildren<{
-  type: TableTypes;
-}>) {
-  // ---------------------------------------------------------------------------
+}: PropsWithChildren<{ type: TableTypes; hideExamples: boolean }>) {
   const isResponse = type === 'response';
-  return (
-    <div className="parameters-table">
-      <h4 className="title">{titles[type]}</h4>
-      <div className="columns">
-        <div className="content">
-          <div className="item">
-            <div className="field">
-              <h4>{isResponse ? 'Status Code' : 'Parameter Name'}</h4>
-              <h4>{isResponse ? 'Response Value' : 'Parameter Type'}</h4>
-              {!isResponse && <h4>More Details</h4>}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <ul className="content">{children}</ul>
-    </div>
+  return (
+    <Table
+      style={GridTemplate({ columnCount: hideExamples && !isResponse ? 2 : 3 })}
+    >
+      <>
+        <TableHeader x={1} y={1}>
+          {isResponse ? 'Status Code' : 'Parameter Name'}
+        </TableHeader>
+        <TableHeader x={2} xSize={isResponse ? 2 : 1} y={1}>
+          {isResponse ? 'Response Value' : 'Parameter Type'}
+        </TableHeader>
+        {!hideExamples && !isResponse && (
+          <TableHeader x={3} y={1}>
+            {isResponse ? '' : 'More Details'}
+          </TableHeader>
+        )}
+      </>
+      <>{children}</>
+    </Table>
   );
 }
 
-export function ResponseTableChild({
-  name,
-  description,
-  response,
-}: {
+type TableChildProps = {
+  index: number;
   name: string;
   description: string;
-  response: Response<any, any>;
-}) {
-  const components = useContext(ComponentsContext);
+  required: boolean;
+};
+
+function TableChild({
+  name,
+  description,
+  required,
+  index,
+  children,
+}: PropsWithChildren<TableChildProps>) {
   return (
-    <Tablechild
-      showComment={false}
-      name={name}
-      description={description}
-      required={false}
+    <TableCell
+      x={1}
+      xSize={-1}
+      y={FIRST_CONTENT_ROW + index * 2}
+      ySize={2}
+      subgrid
     >
-      <div className="data">
-        <div className="response-headers">
-          {!!Object.keys(response?.headers ?? {}).length && (
-            <ParametersTable type="header">
-              {Object.keys(response?.headers ?? {}).map((key) => {
-                const header = componentFromRef<'headers'>(
-                  response.headers[key],
-                  components,
-                );
-                return (
-                  <ParametersTableChild
-                    key={key}
-                    name={key}
-                    description={header.description}
-                    required={true}
-                    schema={componentFromRef(header.schema, components)}
-                  />
-                );
-              })}
-            </ParametersTable>
-          )}
-        </div>
-        <div className="response-data">
-          {Object.keys(response?.content ?? {}).map(
-            (contentType: keyof typeof response.content) => (
-              <>
-                <div className="content-type">{contentType}</div>
-                <Schema
-                  key={contentType}
-                  data={componentFromRef<'schemas'>(
-                    response.content[contentType].schema,
-                    components,
-                  )}
-                />
-              </>
-            ),
-          )}
-        </div>
-      </div>
-    </Tablechild>
+      <>
+        <TableSubCell x={1} xSize={-1} y={1} extraClassNames={['comment']}>
+          {'//  '}
+          {description}
+          {/* {'  //'} */}
+        </TableSubCell>
+      </>
+      <>
+        <TableSubCell x={1} y={2} extraClassNames={['name']}>
+          {name}
+          {required && <span className="required">*</span>}
+        </TableSubCell>
+        {children}
+      </>
+    </TableCell>
   );
 }
 
@@ -106,64 +107,255 @@ export function ParametersTableChild({
   name,
   description,
   required,
+  index,
+  hideExample = false,
   schema,
 }: {
   name: string;
   description: string;
   required: boolean;
+  hideExample?: boolean;
   schema: ParsedSchemaType;
+  index: number;
 }) {
+  const inputId = `${name}-${index}-input`;
   return (
-    <Tablechild
-      showComment={true}
+    <TableChild
+      index={index}
       name={name}
       description={description}
       required={required}
     >
-      <Schema data={schema} />
-      <div className="input">
-        {/* <input className="text" name={name} type={'text'} /> */}
-        <div className="hint">{schema.description}</div>
-      </div>
-    </Tablechild>
+      <TableSubCell
+        x={2}
+        xSize={hideExample ? -1 : 1}
+        y={2}
+        extraClassNames={['schema']}
+      >
+        <Schema data={schema} />
+      </TableSubCell>
+      {!hideExample && (
+        <TableSubCell x={3} y={2} extraClassNames={['example']}>
+          <input
+            id={inputId}
+            required={required}
+            className="input"
+            aria-label={`${name} input`}
+            name={name}
+            type={'text'}
+            placeholder={schema?.examples?.[0] ?? 'Placeholder'}
+          />
+          <label htmlFor={inputId} className="hint">
+            {schema.description}
+          </label>
+        </TableSubCell>
+      )}
+    </TableChild>
   );
 }
 
-function Tablechild({
+export function ResponseTableChild({
+  index,
   name,
-  required,
-  showComment = true,
-  description,
-  children,
-}: PropsWithChildren<{
+  response: { headers = {}, content = {}, description },
+}: {
+  index: number;
   name: string;
-  showComment: boolean;
-  description: string;
-  required: boolean;
-}>) {
+  response: Response<any, any>;
+}) {
+  const components = useContext(ComponentsContext);
+  const realHeaders = Object.keys(headers).reduce((total, headerKey) => {
+    total.push({
+      name: headerKey,
+      ...componentFromRef<'headers'>(headers[headerKey], components),
+    });
+    return total;
+  }, [] as ParameterTypeProps[]);
+
   return (
-    <li className="item">
-      {showComment && (
-        <div className="comment">
-          {'//  '}
-          {description}
-          {'  //'}
-        </div>
-      )}
-      <div className="field">
-        <div className="name">
-          {name}
-          {!showComment && (
-            <>
-              {' - '}
-              <span className="response-description">{description}</span>
-            </>
-          )}
-          {required && <span className="required">*</span>}
-        </div>
-        {children}
-      </div>
-    </li>
+    <TableChild
+      index={index}
+      name={name}
+      description={description}
+      required={false}
+    >
+      <TableSubCell x={2} xSize={2} y={2} extraClassNames={['responses']}>
+        <Tabs
+          fillContent
+          variant={TabsVariants.OPEN_API_RESPONSE}
+          stretchLabels={false}
+          renderers={[
+            ParametersTableTabRenderer({
+              type: 'header',
+              allowRequired: false,
+              hideExamples: true,
+              params: realHeaders,
+            }),
+            BodyParametersTableTabRenderer({
+              hideExamples: true,
+              content,
+            }),
+          ]}
+        />
+      </TableSubCell>
+    </TableChild>
+  );
+}
+
+type ParameterTypeProps = Omit<ParameterType, 'in'>;
+
+export function ParametersTableTabRenderer({
+  type,
+  allowRequired,
+  hideExamples,
+  params,
+}: {
+  type: 'path' | 'header' | 'query';
+  allowRequired: boolean;
+  hideExamples: boolean;
+  params: ParameterTypeProps[];
+}) {
+  return TabItemRenderers({
+    label: `${titles[type]} PARAMS`,
+    labelProps: {
+      variant: hideExamples
+        ? TabItemLabelVariants.OPEN_API_RESPONSE
+        : TabItemLabelVariants.OPEN_API_PARAMS,
+      children: hideExamples ? undefined : (
+        <span className={paramsLabel}>
+          {titles[type]} (<span className={paramsCount}>{params.length}</span>)
+        </span>
+      ),
+    },
+    panelProps: {
+      children: (
+        <FullParametersTable
+          type={type}
+          allowRequired={allowRequired}
+          params={params}
+          hideExamples={hideExamples}
+        />
+      ),
+    },
+    tabId: type,
+    disabled: !params.length,
+  });
+}
+
+export function BodyParametersTableTabRenderer({
+  hideExamples,
+  content,
+}: {
+  hideExamples: boolean;
+  content: Content<any>;
+}) {
+  const components = useContext(ComponentsContext);
+
+  return TabItemRenderers({
+    label: `REQUEST ${titles.body}`,
+    labelProps: {
+      variant: hideExamples
+        ? TabItemLabelVariants.OPEN_API_RESPONSE
+        : TabItemLabelVariants.OPEN_API_PARAMS,
+      children: hideExamples ? undefined : (
+        <span className={paramsLabel}>
+          {titles.body} (
+          <span className={paramsCount}>{Object.keys(content).length}</span>)
+        </span>
+      ),
+    },
+    panelProps: {
+      children: (
+        <FullParametersTable
+          type="body"
+          allowRequired={true}
+          params={Object.keys(content)
+            .filter((type) => !!content[type])
+            .map((type) => ({
+              description: `Request body of type \`(${type})\``,
+              name: `body - \`${type}\``,
+              schema: componentFromRef<'schemas'>(
+                content[type].schema,
+                components,
+              ),
+              // TODO - evaluate when is the value required
+              // required: false,
+            }))}
+          hideExamples={hideExamples}
+        />
+      ),
+    },
+    tabId: 'body',
+    disabled: !Object.keys(content).length,
+  });
+}
+
+export function FullParametersTable({
+  type,
+  allowRequired,
+  hideExamples,
+  params,
+}: {
+  type: TableTypes;
+  allowRequired: boolean;
+  hideExamples: boolean;
+  params: ParameterTypeProps[];
+}) {
+  const components = useContext(ComponentsContext);
+  return (
+    <ParametersTable type={type} hideExamples={hideExamples}>
+      {params.map(({ name, description, required, schema }, index) => (
+        <ParametersTableChild
+          key={name}
+          index={index}
+          name={name}
+          description={description}
+          required={allowRequired && required}
+          schema={componentFromRef(schema, components)}
+          hideExample={hideExamples}
+        />
+      ))}
+    </ParametersTable>
+  );
+}
+
+export function ResponsesTableTabRenderer({
+  responses,
+}: {
+  responses: Responses;
+}) {
+  return TabItemRenderers({
+    label: titles.response,
+    labelProps: {
+      variant: TabItemLabelVariants.OPEN_API_PARAMS,
+      children: (
+        <span className={paramsLabel}>
+          {titles.response} (
+          <span className={paramsCount}>{Object.keys(responses).length}</span>)
+        </span>
+      ),
+    },
+    panelProps: {
+      children: <FullResponsesTable responses={responses} />,
+    },
+    tabId: 'response',
+    disabled: false,
+  });
+}
+
+export function FullResponsesTable({ responses }: { responses: Responses }) {
+  const components = useContext(ComponentsContext);
+  return (
+    <ParametersTable type={'response'} hideExamples={true}>
+      {Object.keys(responses).map((code, index) => (
+        <ResponseTableChild
+          key={code}
+          index={index}
+          name={code}
+          response={componentFromRef<'responses'>(responses[code], components)}
+        />
+      ))}
+    </ParametersTable>
   );
 }
 

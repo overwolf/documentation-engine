@@ -1,0 +1,136 @@
+/**
+ * Variables (light theme)
+ */
+html {
+  --ow-components-tabs-labels-color: #202020;
+  --ow-components-tabs-labels-active: #D34037;
+  --ow-components-tabs-conatiner-color: #101010;
+
+  /**
+   * Variables (light theme)
+   */
+  &[data-theme="dark"] {
+    --ow-components-tabs-labels-color: #202020;
+    --ow-components-tabs-labels-active: #D34037;
+    --ow-components-tabs-conatiner-color: #101010;
+  }
+}
+
+/**
+ * Root Component
+ */
+.tabs {
+  display: flex;
+  flex-direction: column;
+
+  /**
+   * Labels container
+   */
+  >.labels {
+    display: flex;
+    flex-direction: row;
+
+    &:not(.none) {
+      padding: 12px 20px 0px;
+      gap: 24px;
+
+      &.stretch-labels {
+        gap: unset;
+        justify-content: space-between;
+      }
+    }
+
+    &.default {
+      background-color: var(--ow-components-tabs-labels-color);
+    }
+
+    /**
+     * Individual label
+     */
+    >.tab-label {
+      &:not(.none) {
+        width: fit-content;
+        text-align: center;
+
+        border-bottom-width: 4px;
+        border-bottom-style: solid;
+        border-bottom-color: transparent;
+
+        background-color: transparent;
+
+        /**
+         * Is this label's tab the current active tab
+         */
+        &.active {
+          border-bottom-color: var(--ow-components-tabs-labels-active)
+        }
+
+        /**
+         * Is this tab currently disabled
+         */
+        // &.disabled {}
+      }
+
+      &.default {
+        padding: 0px;
+        color: #9F9F9F;
+        /* Label/S-Regular */
+        font-family: Montserrat;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px;
+        /* 171.429% */
+
+        &:hover,
+        &.active {
+          color: var(--text-secondary, #DFDFDF);
+          /* Label/S-Medium */
+          font-family: Montserrat;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 24px;
+          /* 171.429% */
+        }
+      }
+    }
+  }
+
+  /**
+   * Tab panels container
+   */
+  >.container {
+    &.default {
+      padding: 0px;
+
+      background-color: var(--ow-components-tabs-conatiner-color-color);
+
+      /**
+       * Flag for controlling whether or not the container has padding
+       */
+      &.padded {
+        padding: 24px;
+      }
+    }
+
+    /**
+     * Individual tab penels
+     */
+    >.tab-panel {
+      display: none;
+
+      /**
+       * Is this tab the current active tab
+       */
+      &.active {
+        display: block;
+      }
+
+      // &.default {
+      // &.active {}
+      // &.disabled {}
+      // }
+    }
+  }
+}

@@ -60,6 +60,11 @@ export const defaultOptions = {
       closingTag: '>',
       blockType: 'Generic',
     },
+    {
+      openingTag: '(',
+      closingTag: ')',
+      blockType: 'Group',
+    },
   ] as BlockDefinition[],
   escapeSequences: [
     commentBlockRich,
@@ -79,7 +84,7 @@ export type BlockDefinition = {
   blockType: BracketTypes;
 };
 
-export type BracketTypes = 'Object' | 'Array' | 'Params' | 'Generic';
+export type BracketTypes = 'Object' | 'Array' | 'Params' | 'Generic' | 'Group';
 
 /** Convenience guard type & redundancy to make typescript not error */
 type Options<T extends BaseBlockOptions> = T & BaseBlockOptions;

@@ -30,6 +30,7 @@ import RootSubParser from './syntax/root';
 import escapedContent from '../../../_base/fp-ts/escaped-content';
 import { DJNB } from '../../core/node';
 import AssignmentSubParser from './syntax/assignment';
+import GroupSubParser from './syntax/values/literal/group';
 
 export type Content = EscapedSequence<EscapedSyntax, EscapeSequences>;
 
@@ -95,6 +96,9 @@ export default class DisplayJSONParser extends BaseParser<
       [DisplayJSONUnits._r_variable]: [new VarSubParser()],
 
       [DisplayJSONUnits._commented]: [],
+      [DisplayJSONUnits._group]: [
+        new GroupSubParser(FormatBrackets('Group', options.blocks)),
+      ],
     } as Required<ParserUnits<DisplayJSONUnits, DJNB>>;
   }
 
