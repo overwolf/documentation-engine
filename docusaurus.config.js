@@ -20,7 +20,7 @@ const defaultConfig = {
   // scripts: [] // scripts to be added to every page in the website
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Lato%3A400%2C400i%2C700%2C900&ver=4.5.3',
-    'https://fonts.googleapis.com/css?family=Montserrat%3A400%2C400i%2C700%2C900&ver=4.5.3',
+    'https://fonts.googleapis.com/css?family=Montserrat%3A400%2C500%2C600%2C700%2C900&ver=4.5.3',
   ],
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
