@@ -1,21 +1,14 @@
-html{ // [data-theme=dark]
-  --open-api-request-get: #EC7068;
-  --open-api-request-post: #7ED5D6;
-
-  --open-api-params-table-background: #000000;
-  --open-api-params-table-title: #101010;
-  --open-api-params-table-border: #202020;
-
-  --open-api-params-table-comment: #9F9F9F;
-  --open-api-params-table-name: #DFDFDF;
-}
-
-html[data-theme=light]{
-
-}
-
-
 .open-api {
+  --open-api-request-get: var(--color-infographic-ow-5);
+  --open-api-request-post: var(--color-functional-info-light);
+
+  --open-api-params-table-background: var(--color-surface-pure);
+  --open-api-params-table-title: var(--color-surface-primary);
+  --open-api-params-table-border: var(--color-border-tertiary);
+
+  --open-api-params-table-comment: var(--color-text-tertiary);
+  --open-api-params-table-name: var(--color-text-tertiary);
+
   ul {
     all: unset;
     list-style-type: none !important;
@@ -41,6 +34,10 @@ html[data-theme=light]{
       display: flex;
       flex-direction: column;
       gap: 40px;
+
+      &::before {
+        display: none;
+      }
 
       .type {
         white-space: pre-wrap;
@@ -88,11 +85,17 @@ html[data-theme=light]{
         .columns {
           h4 {
             font-size: 14px !important;
+            margin: 0;
           }
         }
 
         .content {
           .item {
+            margin-top: 0;
+            &::before {
+              display: none;
+            }
+
             & > * {
               border-color: var(--open-api-params-table-border);
               border-width: 1px 0px 0px;
